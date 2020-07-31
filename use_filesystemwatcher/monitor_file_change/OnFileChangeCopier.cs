@@ -20,7 +20,7 @@ namespace monitor_file_change
 
         public override string ToString()
         {
-            return string.Format("serialNumber: {0}, fileWriteTime: {1}, occredTime: {2}", serialNumber, fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), occuredTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            return string.Format("serialNumber: {0}, fileWriteTime: {1}, occredTime: {2}", serialNumber, fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"), occuredTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
         }
     }
 
@@ -32,7 +32,7 @@ namespace monitor_file_change
 
         public override string ToString()
         {
-            return string.Format("fileChangeInfo: [{0}], copiedFilePath: {1}, copiedCompleteTime: {2}", fileChangeInfo, copiedFilePath, copiedCompleteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            return string.Format("fileChangeInfo: [{0}], copiedFilePath: {1}, copiedCompleteTime: {2}", fileChangeInfo, copiedFilePath, copiedCompleteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
         }
     }
 
@@ -89,8 +89,21 @@ namespace monitor_file_change
             {
                 throw new Exception(string.Format("sourceFile \"{0}\" not exist", sourceFilePath));
             }
+            logger.Info("[FileToucher.LoopFlushFile] source file path: \"{0}\"", sourceFilePath);
+            logger.Info("[FileToucher.LoopFlushFile] target file path: \"{0}\"", targetFilePath);
             Task.Run(() => CopyOnFileChange());
             Task.Run(() => ProcessCopiedFile());
+        }
+
+        void OnChanged(object source, FileSystemEventArgs e)
+        {
+            lock(fileChangeInfo)
+            {
+                fileChangeInfo.fileWriteTime = File.GetLastWriteTime(sourceFilePath);
+                fileChangeInfo.occuredTime = DateTime.Now;
+                fileChangeInfo.serialNumber++;
+            }
+            fileChanged.Set();
         }
 
         void StartFileWatcher()
@@ -98,15 +111,7 @@ namespace monitor_file_change
             fileSystemWatcher.Path = Path.GetDirectoryName(sourceFilePath);
             fileSystemWatcher.Filter = Path.GetFileName(sourceFilePath);
             fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            fileSystemWatcher.Changed += ((object source, FileSystemEventArgs e) => {
-                lock(fileChangeInfo)
-                {
-                    fileChangeInfo.fileWriteTime = File.GetLastWriteTime(sourceFilePath);
-                    fileChangeInfo.occuredTime = DateTime.Now;
-                    fileChangeInfo.serialNumber++;
-                }
-                fileChanged.Set();
-            });
+            fileSystemWatcher.Changed += OnChanged;
             fileSystemWatcher.EnableRaisingEvents = true;
         }
 
@@ -131,7 +136,7 @@ namespace monitor_file_change
                     }
                     logger.Info("[OnFileChangeCopier.CopyOnFileChange] file changed, fileChangeInfo({0})", fileChangeInfo.ToString());
 
-                    fileCopiedInfo.copiedFilePath = targetFilePath + DateTime.Now.ToString("_yyyyMMdd-HHmmss.fff");
+                    fileCopiedInfo.copiedFilePath = targetFilePath + DateTime.Now.ToString("_yyyyMMdd-HHmmss.ffff");
                     File.Copy(sourceFilePath, fileCopiedInfo.copiedFilePath);
                     fileCopiedInfo.copiedCompleteTime = DateTime.Now;
                     fileCopiedQueue.Enqueue(fileCopiedInfo);
@@ -175,7 +180,7 @@ namespace monitor_file_change
                         DateTime fileWriteTime = File.GetLastWriteTime(fileCopiedInfo.copiedFilePath);
                         if (fileWriteTime != fileCopiedInfo.fileChangeInfo.fileWriteTime)
                         {
-                            logger.Warn("[OnFileChangeCopier.ProcessCopiedFile] file changed on copy, before({0}), after({1})", fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), fileChangeInfo.fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                            logger.Warn("[OnFileChangeCopier.ProcessCopiedFile] file changed on copy, before({0}), after({1})", fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"), fileChangeInfo.fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
                         }
                     }
                 }

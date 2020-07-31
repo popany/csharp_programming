@@ -17,19 +17,20 @@ namespace change_file
             Configuration configuration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSettings = configuration.AppSettings;
 
-            FileToucher fileToucher = new FileToucher();
-            fileToucher.Logger = logger;
-            fileToucher.FilePath = appSettings.Settings["file_path"].Value.ToString();
-            fileToucher.LoopIntervalMs = int.Parse(appSettings.Settings["loop_interval_ms"].Value.ToString());
+            FileChanger fileChanger = new FileChanger();
+            fileChanger.Logger = logger;
+            fileChanger.FilePath = appSettings.Settings["file_path"].Value.ToString();
+            fileChanger.LoopIntervalMs = int.Parse(appSettings.Settings["loop_interval_ms"].Value.ToString());
+            fileChanger.SetMode(int.Parse(appSettings.Settings["mode"].Value.ToString()));
 
-            fileToucher.Start();
+            fileChanger.Start();
 
             while (true)
             {
                 string s = Console.ReadLine();
                 if (s == "exit")
                 {
-                    fileToucher.Close();
+                    fileChanger.Close();
                     break;
                 }
             }
