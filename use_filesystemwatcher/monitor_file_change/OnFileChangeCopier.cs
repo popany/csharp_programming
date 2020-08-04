@@ -18,6 +18,12 @@ namespace monitor_file_change
         public DateTime fileWriteTime = DateTime.MinValue;
         public DateTime occuredTime = DateTime.MinValue;
 
+        public FileChangeInfo Copy()
+        {
+            FileChangeInfo other = (FileChangeInfo)this.MemberwiseClone();
+            return other;
+        }
+
         public override string ToString()
         {
             return string.Format("serialNumber: {0}, fileWriteTime: {1}, occredTime: {2}", serialNumber, fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"), occuredTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
@@ -132,7 +138,7 @@ namespace monitor_file_change
                     }
                     lock (fileChangeInfo)
                     {
-                        fileCopiedInfo.fileChangeInfo = fileChangeInfo;
+                        fileCopiedInfo.fileChangeInfo = fileChangeInfo.Copy();
                     }
                     logger.Info("[OnFileChangeCopier.CopyOnFileChange] file changed, fileChangeInfo({0})", fileChangeInfo.ToString());
 
@@ -180,7 +186,7 @@ namespace monitor_file_change
                         DateTime fileWriteTime = File.GetLastWriteTime(fileCopiedInfo.copiedFilePath);
                         if (fileWriteTime != fileCopiedInfo.fileChangeInfo.fileWriteTime)
                         {
-                            logger.Warn("[OnFileChangeCopier.ProcessCopiedFile] file changed on copy, before({0}), after({1})", fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"), fileChangeInfo.fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
+                            logger.Warn("[OnFileChangeCopier.ProcessCopiedFile] file changed on copy, before({0}), after({1})", fileChangeInfo.fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"), fileWriteTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
                         }
                     }
                 }
