@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -127,6 +128,7 @@ namespace use_unmanaged_driver // need install Oracle Data Access Components (OD
 
         void InsertIntoTable(string insertCommandText, Dictionary<string, OracleParameter> insertParams, int dataCount)
         {
+            Stopwatch stopwatch = new Stopwatch();
             using (OracleCommand command = connection.CreateCommand())
             {
                 command.CommandText = insertCommandText;
@@ -137,13 +139,16 @@ namespace use_unmanaged_driver // need install Oracle Data Access Components (OD
                 {
                     command.Parameters.Add(e.Value);
                 }
+                stopwatch.Start();
                 command.ExecuteNonQuery();
+                stopwatch.Stop();
             }
+            Console.WriteLine("time consumed: {0}ms", stopwatch.ElapsedMilliseconds);
         }
 
         void WriteData()
         {
-            List<DataRow> d = GenerateData(10);
+            List<DataRow> d = GenerateData(10000);
             Dictionary<string, OracleParameter> insertParams = GetInsertParams(d);
             string insertCommandText = $"insert into {tableName} ({GetColumnNames(insertParams.Keys.ToList())}) values ({GetParamPlaceholders(insertParams.Keys.ToList())})";
             OpenDbConnection();

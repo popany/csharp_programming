@@ -1,31 +1,24 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.DataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace use_managed_driver
+namespace use_bulkcopy
 {
-    struct DataRow
-    {
-        public int id;
-        public string name;
-    }
-
-    class ManagedDatabaseAccessor
+    public class BulkCopyDemo
     {
         const string tableName = "T_TEST_ODP";
         const string createTableSql = "create table t_test_odp (" +
-            "id number," +
-            "name varchar2(200))";
+            "ID number," +
+            "NAME varchar2(200))";
 
         OracleConnection connection = null;
 
-        public ManagedDatabaseAccessor()
+        public BulkCopyDemo()
         {
             InitDbConnection();
         }
@@ -101,61 +94,37 @@ namespace use_managed_driver
             trans.Commit();
         }
 
-        List<DataRow> GenerateData(int n)
+        DataTable GenerateData(int n)
         {
-            List<DataRow> d = new List<DataRow>();
+            DataTable dt = new DataTable();
+            dt.Columns.Add("ID");
+            dt.Columns.Add("NAME");
+            dt.Columns["ID"].DataType = typeof(Int32);
+
             for (int i = 0; i < n; i++)
             {
-                d.Add(new DataRow
-                {
-                    id = i,
-                    name = string.Format("name_{0}", i)
-                });
+                DataRow dr = dt.NewRow();
+                dr["ID"] = i;
+                dr["NAME"] = "name_" + i;
+                dt.Rows.Add(dr);
             }
-            return d;
-        }
-
-        Dictionary<string, OracleParameter> GetInsertParams(List<DataRow> d)
-        {
-            Dictionary<string, OracleParameter> paramsMap = new Dictionary<string, OracleParameter>();
-            paramsMap.Add("id", new OracleParameter(":id", OracleDbType.Int32, d.Select(c => c.id).ToArray(), ParameterDirection.Input));
-            paramsMap.Add("name", new OracleParameter(":name", OracleDbType.Varchar2, d.Select(c => c.name).ToArray(), ParameterDirection.Input));
-            return paramsMap;
-        }
-
-        private static string GetColumnNames(List<string> columnNames) => string.Join(", ", (from string column in columnNames select column));
-
-        private static string GetParamPlaceholders(List<string> columnNames) => string.Join(", ", (from string column in columnNames select $":{column}"));
-
-        void InsertIntoTable(string insertCommandText, Dictionary<string, OracleParameter> insertParams, int dataCount)
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            using (OracleCommand command = connection.CreateCommand())
-            {
-                command.CommandText = insertCommandText;
-                command.ArrayBindCount = dataCount;
-                command.CommandType = CommandType.Text;
-                command.BindByName = true;
-                foreach (var e in insertParams)
-                {
-                    command.Parameters.Add(e.Value);
-                }
-                stopwatch.Start();
-                command.ExecuteNonQuery();
-                stopwatch.Stop();
-            }
-            Console.WriteLine("time consumed: {0}ms", stopwatch.ElapsedMilliseconds);
+            return dt;
         }
 
         void WriteData()
         {
-            List<DataRow> d = GenerateData(10000);
-            Dictionary<string, OracleParameter> insertParams = GetInsertParams(d);
-            string insertCommandText = $"insert into {tableName} ({GetColumnNames(insertParams.Keys.ToList())}) values ({GetParamPlaceholders(insertParams.Keys.ToList())})";
+            DataTable dt = GenerateData(10000);
             OpenDbConnection();
-            OracleTransaction trans = connection.BeginTransaction();
-            InsertIntoTable(insertCommandText, insertParams, d.Count);
-            trans.Commit();
+            Stopwatch stopwatch = new Stopwatch();
+            using (var bulkCopy = new Oracle.DataAccess.Client.OracleBulkCopy(connection, Oracle.DataAccess.Client.OracleBulkCopyOptions.UseInternalTransaction))
+            {
+                bulkCopy.DestinationTableName = tableName;
+                bulkCopy.BulkCopyTimeout = 600;
+                stopwatch.Start();
+                bulkCopy.WriteToServer(dt);
+                stopwatch.Stop();
+            }
+            Console.WriteLine("time consumed: {0}ms", stopwatch.ElapsedMilliseconds);
         }
 
         public void WriteTable()
@@ -165,4 +134,3 @@ namespace use_managed_driver
         }
     }
 }
-
