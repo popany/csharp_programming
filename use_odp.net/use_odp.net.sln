@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_odp.net", "use_odp.net\use_odp.net.csproj", "{4A511BB7-1DB9-4372-87BE-DA185313BE9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_managed_driver", "use_managed_driver\use_managed_driver.csproj", "{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A511BB7-1DB9-4372-87BE-DA185313BE9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A511BB7-1DB9-4372-87BE-DA185313BE9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A511BB7-1DB9-4372-87BE-DA185313BE9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A511BB7-1DB9-4372-87BE-DA185313BE9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE41D41D-524D-4544-89A7-43A697B9C137}
+	EndGlobalSection
+EndGlobal
