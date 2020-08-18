@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_odp.net", "use_odp.net\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_managed_driver", "use_managed_driver\use_managed_driver.csproj", "{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_unmanaged_driver", "use_unmanaged_driver\use_unmanaged_driver.csproj", "{3A2173B7-2A77-4714-A8D0-79471342FF07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,9 @@ Global
 		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31B4BFE6-D9BA-4ED6-92AD-05D680CC8815}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A2173B7-2A77-4714-A8D0-79471342FF07}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3A2173B7-2A77-4714-A8D0-79471342FF07}.Debug|Any CPU.Build.0 = Debug|x86
+		{3A2173B7-2A77-4714-A8D0-79471342FF07}.Release|Any CPU.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
