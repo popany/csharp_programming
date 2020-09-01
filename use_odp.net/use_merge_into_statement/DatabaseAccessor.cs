@@ -328,6 +328,19 @@ namespace use_merge_into_statement
             stopwatch.Stop();
             Console.WriteLine($"merging table consumes: {stopwatch.ElapsedMilliseconds}ms");
         }
+        
+        public void ExecuteSql(string sql)
+        {
+            OpenDbConnection();
+            OracleTransaction trans = connection.BeginTransaction();
+            using (OracleCommand command = connection.CreateCommand())
+            {
+                command.CommandText = sql;
+                command.CommandType = System.Data.CommandType.Text;
+                command.ExecuteNonQuery();
+            }
+            trans.Commit();
+        }
     }
 }
 

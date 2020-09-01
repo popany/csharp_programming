@@ -158,6 +158,12 @@ namespace use_merge_into_statement
 
             DataTable dtToMerge = CreateData(tableName, 10000, columnCount, 2);
             string[] mergeOnKeys = { "column_1", "column_2" };
+
+            stopwatch.Start();
+            dba.ExecuteSql(CreateIndexSql(tableName, mergeOnKeys));
+            stopwatch.Stop();
+            Console.WriteLine($"creating index consumes: {stopwatch.ElapsedMilliseconds}ms");
+
             ChangeDataForTestMerge(dtToMerge, new HashSet<string>(mergeOnKeys));
             dba.MergeIntoTable(dtToMerge, mergeOnKeys.ToList());
         }
@@ -230,6 +236,12 @@ namespace use_merge_into_statement
 
             List<object> datasToMerge = CreateData(10000, columnCount, 2);
             string[] mergeOnKeys = { "column_1", "column_2" };
+
+            stopwatch.Start();
+            dba.ExecuteSql(CreateIndexSql(tableName, mergeOnKeys));
+            stopwatch.Stop();
+            Console.WriteLine($"creating index consumes: {stopwatch.ElapsedMilliseconds}ms");
+
             ChangeDataForTestMerge(datasToMerge, new HashSet<string>(mergeOnKeys));
             dba.MergeIntoTable(datasToMerge, tableName, mergeOnKeys.ToList());
         }
@@ -251,6 +263,12 @@ namespace use_merge_into_statement
 
             DataTable dtToUpdate = CreateData(tableName, 10000, columnCount, 1);
             string[] mergeOnKeys = { "column_1", "column_2" };
+
+            stopwatch.Start();
+            dba.ExecuteSql(CreateIndexSql(tableName, mergeOnKeys));
+            stopwatch.Stop();
+            Console.WriteLine($"creating index consumes: {stopwatch.ElapsedMilliseconds}ms");
+
             ChangeDataForTestMerge(dtToUpdate, new HashSet<string>(mergeOnKeys));
             dba.UpdateTable(dtToUpdate, mergeOnKeys.ToList());
         }
@@ -272,13 +290,25 @@ namespace use_merge_into_statement
 
             DataTable dtToInsert = CreateData(tableName, 10000, columnCount, 1);
             string[] mergeOnKeys = { "column_1", "column_2" };
+
+            stopwatch.Start();
+            dba.ExecuteSql(CreateIndexSql(tableName, mergeOnKeys));
+            stopwatch.Stop();
+            Console.WriteLine($"creating index consumes: {stopwatch.ElapsedMilliseconds}ms");
+
             ChangeDataForTestMerge(dtToInsert, new HashSet<string>(mergeOnKeys));
             dba.DeleteAndInsertTable(dtToInsert);
         }
 
+        static string CreateIndexSql(string tableName, string[] keys)
+        {
+            string sql = $"create index {tableName}_index on {tableName} ({string.Join(", ", keys.Select(c=>$"{c}"))})";
+            return sql;
+        }
+
         static void Main(string[] args)
         {
-#if false
+#if true
             TestMergeIntoTableUseDataTable();
 #endif
 
@@ -290,7 +320,7 @@ namespace use_merge_into_statement
             TestUpdateTableUseDataTable();
 #endif
 
-#if true 
+#if false
             TestDeleteInsertTableUseDataTable();
 #endif
         }
