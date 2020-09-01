@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_unmanaged_driver", "use
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_bulkcopy", "use_bulkcopy\use_bulkcopy.csproj", "{AAD5C848-D41B-4B1C-B279-AC69381C740D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "use_merge_into_statement", "use_merge_into_statement\use_merge_into_statement.csproj", "{01AC7E32-8DE5-4B3F-9B66-F981716228F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{AAD5C848-D41B-4B1C-B279-AC69381C740D}.Debug|Any CPU.Build.0 = Debug|x86
 		{AAD5C848-D41B-4B1C-B279-AC69381C740D}.Release|Any CPU.ActiveCfg = Release|x86
 		{AAD5C848-D41B-4B1C-B279-AC69381C740D}.Release|Any CPU.Build.0 = Release|x86
+		{01AC7E32-8DE5-4B3F-9B66-F981716228F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01AC7E32-8DE5-4B3F-9B66-F981716228F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01AC7E32-8DE5-4B3F-9B66-F981716228F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01AC7E32-8DE5-4B3F-9B66-F981716228F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
