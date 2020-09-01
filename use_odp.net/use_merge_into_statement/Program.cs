@@ -83,3 +83,4 @@ namespace use_merge_into_statement
         }
     }
 }
+
