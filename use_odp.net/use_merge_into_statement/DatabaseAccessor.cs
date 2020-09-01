@@ -155,6 +155,8 @@ namespace use_merge_into_statement
 
         private static string GetMergeInsertParam(string table, List<string> columnNames) => string.Join(", ", columnNames.Select(c => $"{table}.{c}"));
 
+        private static string GetUpdateParam(string table, HashSet<string> keys, List<string> columnNames) => string.Join(", ", columnNames.Where(c => !keys.Contains(c)).Select(c => $"{table}.{c}=:{c}"));
+
         void ExecuteInsert(string insertCommandText, Dictionary<string, OracleParameter> insertParams, int dataCount)
         {
             using (OracleCommand command = connection.CreateCommand())
@@ -219,6 +221,29 @@ namespace use_merge_into_statement
             MergeIntoTable(dt.TableName, insertParams, dt.Rows.Count, keys);
             stopwatch.Stop();
             Console.WriteLine($"merging table consumes: {stopwatch.ElapsedMilliseconds}ms");
+        }
+
+        public void UpdateTable(string tableName, Dictionary<string, OracleParameter> insertParams, int count, List<string> keys)
+        {
+            HashSet<string> keySet = new HashSet<string>(keys);
+            string updateCommandText = $"update {tableName} a " +
+                $"set {GetUpdateParam("a", keySet, insertParams.Keys.ToList())} " +
+                $"where {string.Join(" and ", keys.Select(c => $"a.{c}=:{c}"))}";
+
+            OpenDbConnection();
+            OracleTransaction trans = connection.BeginTransaction();
+            ExecuteInsert(updateCommandText, insertParams, count);
+            trans.Commit();
+        }
+
+        public void UpdateTable(DataTable dt, List<string> keys)
+        {
+            Dictionary<string, OracleParameter> insertParams = GetInsertParams(dt);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            UpdateTable(dt.TableName, insertParams, dt.Rows.Count, keys);
+            stopwatch.Stop();
+            Console.WriteLine($"update table consumes: {stopwatch.ElapsedMilliseconds}ms");
         }
 
         Dictionary<string, OracleParameter> GetInsertParams(List<object> datas)

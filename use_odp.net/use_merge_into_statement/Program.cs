@@ -234,12 +234,39 @@ namespace use_merge_into_statement
             dba.MergeIntoTable(datasToMerge, tableName, mergeOnKeys.ToList());
         }
 
+        static void TestUpdateTableUseDataTable()
+        {
+            const string tableName = "T_TEST_MERGE_INTO";
+            const int columnCount = 50;
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            DataTable dt = CreateData(tableName, 10000, columnCount, 1);
+            stopwatch.Stop();
+            Console.WriteLine($"preparing data consumes: {stopwatch.ElapsedMilliseconds}ms");
+
+            DatabaseAccessor dba = new DatabaseAccessor();
+            dba.CreateTable(tableName, GetCreateTableSql(tableName, columnCount));
+            dba.InsertIntoTable(dt);
+
+            DataTable dtToMerge = CreateData(tableName, 10000, columnCount, 1);
+            string[] mergeOnKeys = { "column_1", "column_2" };
+            ChangeDataForTestMerge(dtToMerge, new HashSet<string>(mergeOnKeys));
+            dba.UpdateTable(dtToMerge, mergeOnKeys.ToList());
+        }
+
         static void Main(string[] args)
         {
 #if false
             TestMergeIntoTableUseDataTable();
-#else
+#endif
+
+#if false
             TestMergeIntoTableUseReflection();
+#endif
+
+#if true
+            TestUpdateTableUseDataTable();
 #endif
         }
     }
