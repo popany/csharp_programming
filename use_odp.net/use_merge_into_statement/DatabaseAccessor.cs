@@ -181,6 +181,7 @@ namespace use_merge_into_statement
             ExecuteInsert(insertCommandText, insertParams, count);
             trans.Commit();
         }
+
         public void MergeIntoTable(string tableName, Dictionary<string, OracleParameter> insertParams, int count, List<string> keys)
         {
             HashSet<string> keySet = new HashSet<string>(keys);
@@ -244,6 +245,36 @@ namespace use_merge_into_statement
             UpdateTable(dt.TableName, insertParams, dt.Rows.Count, keys);
             stopwatch.Stop();
             Console.WriteLine($"update table consumes: {stopwatch.ElapsedMilliseconds}ms");
+        }
+
+        void DeleteFromTable(string tableName)
+        {
+            using (OracleCommand command = connection.CreateCommand())
+            {
+                command.CommandText = string.Format("delete from {0}", tableName);
+                command.CommandType = System.Data.CommandType.Text;
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void DeleteAndInsertTable(string tableName, Dictionary<string, OracleParameter> insertParams, int count)
+        {
+            string insertCommandText = $"insert into {tableName} ({GetColumnNames(insertParams.Keys.ToList())}) values ({GetParamPlaceholders(insertParams.Keys.ToList())})";
+            OpenDbConnection();
+            OracleTransaction trans = connection.BeginTransaction();
+            DeleteFromTable(tableName);
+            ExecuteInsert(insertCommandText, insertParams, count);
+            trans.Commit();
+        }
+
+        public void DeleteAndInsertTable(DataTable dt)
+        {
+            Dictionary<string, OracleParameter> insertParams = GetInsertParams(dt);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            DeleteAndInsertTable(dt.TableName, insertParams, dt.Rows.Count);
+            stopwatch.Stop();
+            Console.WriteLine($"inserting table consumes: {stopwatch.ElapsedMilliseconds}ms");
         }
 
         Dictionary<string, OracleParameter> GetInsertParams(List<object> datas)
