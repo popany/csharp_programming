@@ -157,7 +157,6 @@ namespace use_merge_into_statement
 
         void ExecuteInsert(string insertCommandText, Dictionary<string, OracleParameter> insertParams, int dataCount)
         {
-            Stopwatch stopwatch = new Stopwatch();
             using (OracleCommand command = connection.CreateCommand())
             {
                 command.CommandText = insertCommandText;
@@ -168,11 +167,8 @@ namespace use_merge_into_statement
                 {
                     command.Parameters.Add(e.Value);
                 }
-                stopwatch.Start();
                 command.ExecuteNonQuery();
-                stopwatch.Stop();
             }
-            Console.WriteLine("time consumed: {0}ms", stopwatch.ElapsedMilliseconds);
         }
 
         public void InsertIntoTable(string tableName, Dictionary<string, OracleParameter> insertParams, int count)
@@ -221,6 +217,58 @@ namespace use_merge_into_statement
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             MergeIntoTable(dt.TableName, insertParams, dt.Rows.Count, keys);
+            stopwatch.Stop();
+            Console.WriteLine($"merging table consumes: {stopwatch.ElapsedMilliseconds}ms");
+        }
+
+        Dictionary<string, OracleParameter> GetInsertParams(List<object> datas)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Dictionary<string, List<object>> dataMap = new Dictionary<string, List<object>>();
+
+            Type t = datas[0].GetType();
+            foreach (var p in t.GetProperties())
+            {
+                dataMap[p.Name] = new List<object>();
+            }
+            
+            foreach (object d in datas)
+            {
+                foreach (var p in t.GetProperties())
+                {
+                    dataMap[p.Name].Add(p.GetValue(d));
+                }
+            }
+
+            Dictionary<string, OracleParameter> paramsMap = new Dictionary<string, OracleParameter>();
+            foreach (var k in dataMap)
+            {
+                OracleDbType dataType = Utils.GetOracleDbType(k.Value[0]);
+                paramsMap.Add(k.Key, new OracleParameter($":{k.Key}", dataType, k.Value.ToArray(), ParameterDirection.Input));
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine($"preparing parameter consumes: {stopwatch.ElapsedMilliseconds}ms");
+            return paramsMap;
+        }
+
+        public void InsertIntoTable(List<object> datas, string tableName)
+        {
+            Dictionary<string, OracleParameter> insertParams = GetInsertParams(datas);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            InsertIntoTable(tableName, insertParams, datas.Count);
+            stopwatch.Stop();
+            Console.WriteLine($"inserting table consumes: {stopwatch.ElapsedMilliseconds}ms");
+        }
+
+        public void MergeIntoTable(List<object> datas, string tableName, List<string> keys)
+        {
+            Dictionary<string, OracleParameter> insertParams = GetInsertParams(datas);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            MergeIntoTable(tableName, insertParams, datas.Count, keys);
             stopwatch.Stop();
             Console.WriteLine($"merging table consumes: {stopwatch.ElapsedMilliseconds}ms");
         }
